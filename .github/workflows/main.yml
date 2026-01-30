@@ -1,0 +1,31 @@
+name: Basel Dragon Support Bot
+on:
+  schedule:
+    - cron: '*/30 * * * *' # Every 30 minutes
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - run: pip install requests
+      - name: Execute Bot
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+        run: python main.py
+      - name: Save Log
+        run: |
+          git config --global user.name 'DragonBot'
+          git config --global user.email 'bot@baseldragons.com'
+          git add praised_activities.txt || echo "No changes"
+          git commit -m "Log updated" || echo "No changes"
+          git push
